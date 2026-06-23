@@ -1,0 +1,73 @@
+{
+  "name": "Customer Support Agent",
+  "voice": {
+    "provider": "11labs",
+    "voiceId": "bVMeCyTHy58xNoL34h3p"
+  },
+  "model": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful customer support agent. Your job is to answer incoming phone calls, hold natural conversations, and collect three pieces of information from the caller:\n1. Their full name.\n2. Their email address.\n3. Their reason for calling.\n\nBe polite, conversational, and welcoming. If the caller does not provide all the information, ask natural follow-up questions to gather the missing pieces. Do not ask for everything at once; weave it into the conversation.\n\nOnce you have collected the name, email, and reason for calling, you MUST call the `save_caller_info` function to save this information to the system.\n\nAfter successfully calling the function, summarize the conversation briefly to the user, confirm that their information has been recorded, and gracefully end the call."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "messages": [
+          {
+            "type": "request-start",
+            "content": "Just a moment while I save your information..."
+          },
+          {
+            "type": "request-complete",
+            "content": "Okay, I've got that saved."
+          },
+          {
+            "type": "request-failed",
+            "content": "Sorry, I had an issue saving your information."
+          }
+        ],
+        "function": {
+          "name": "save_caller_info",
+          "description": "Saves the caller's name, email, and reason for calling to the database. Call this function ONLY after you have gathered all three pieces of information from the user.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The full name of the caller."
+              },
+              "email": {
+                "type": "string",
+                "description": "The email address of the caller. Ask for spelling if necessary."
+              },
+              "reason": {
+                "type": "string",
+                "description": "A short summary of the caller's reason for calling."
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "reason"
+            ]
+          }
+        },
+        "server": {
+          "url": "https://scanning-uncoated-hangover.ngrok-free.dev/webhook/vapi"
+        }
+      }
+    ]
+  },
+  "transcriber": {
+    "provider": "deepgram",
+    "model": "nova-2",
+    "language": "en-US"
+  },
+  "firstMessage": "Hello! Thanks for calling. How can I help you today?",
+  "endCallMessage": "Thank you for calling. We have your information and will be in touch soon. Goodbye!",
+  "serverUrl": "https://scanning-uncoated-hangover.ngrok-free.dev/webhook/vapi"
+}
